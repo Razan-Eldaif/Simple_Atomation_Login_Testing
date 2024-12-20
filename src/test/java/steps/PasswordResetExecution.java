@@ -3,81 +3,125 @@ package steps;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import static org.testng.Assert.assertEquals;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
+
+import java.time.Duration;
+
 public class PasswordResetExecution {
 
-
-
     private WebDriver driver;
+    private String otp;
 
-    @Given("I navigate to the reset password page")
-    public void i_navigate_to_the_reset_password_page() {
-        System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");
+    // Web Elements
+    private WebElement phoneField;
+    private WebElement sendOTPButton;
+    private WebElement otpField;
+    private WebElement newPasswordField;
+    private WebElement repeatPasswordField;
+    private WebElement resetPasswordButton;
+    private WebElement passwordErrorMessage;
+    private WebElement otpErrorMessage;
+
+    @Given("User on Password Reset page")
+    public void userOnPasswordResetPage() {
+        System.setProperty("webdriver.chrome.driver", "C:/Users/PC/Downloads/chromedriver-win32/chromedriver.exe"); // Add path for chromedriver
         driver = new ChromeDriver();
-        driver.get("https://next.aqar.fm/forgot-password");
+        driver.get("https://next.aqar.fm/forgot-password"); // Directly open the password reset page
     }
 
-    @When("I enter a registered phone number {string}")
-    public void i_enter_a_registered_phone_number(String phoneNumber) {
-        driver.findElement(By.id("phone-number-input")).sendKeys(phoneNumber); // Replace with actual selector
-        driver.findElement(By.id("send-otp-button")).click(); // Replace with actual selector
+    @When("User enters an unregistered phone number {string}")
+    public void userEntersAnUnRegisteredPhoneNumber(String phoneNumber) {
+        phoneField = driver.findElement(By.xpath("//*[@id=\"__next\"]/main/div/div[2]/div/div/div/div/div[2]/div/input"));
+        phoneField.sendKeys(phoneNumber);
+        sendOTPButton = driver.findElement(By.xpath("//*[@id=\"__next\"]/main/div/div[2]/div/div/div/div/button"));
+        sendOTPButton.click();
+        WebElement unregisteredPhone = driver.findElement(By.xpath("//*[@id=\"__next\"]/main/div/div[2]/div/div/div/div/div[2]/div[2]/div"));
+        Assert.assertTrue(unregisteredPhone.isDisplayed());
     }
 
-    @When("I enter an unregistered phone number {string}")
-    public void i_enter_an_unregistered_phone_number(String phoneNumber) {
-        driver.findElement(By.id("phone-number-input")).sendKeys(phoneNumber); // Replace with actual selector
-        driver.findElement(By.id("send-otp-button")).click(); // Replace with actual selector
+    @When("User enters a registered phone number {string}")
+    public void userEntersARegisteredPhoneNumber(String phoneNumber) {
+        phoneField = driver.findElement(By.xpath("//*[@id=\"__next\"]/main/div/div[2]/div/div/div/div/div[2]/div/input"));
+        phoneField.sendKeys(phoneNumber);
+        sendOTPButton = driver.findElement(By.xpath("//*[@id=\"__next\"]/main/div/div[2]/div/div/div/div/button"));
+        sendOTPButton.click();
+        getOtpFromTheAPI("163165");
+
+        // Wait for OTP input and password fields to become visible
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"__next\"]/main/div/div[2]/div/div/div/div/div[3]/div[2]/div[1]/input")));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"__next\"]/main/div/div[2]/div/div/div/div/div[3]/div[4]/div/input")));
     }
 
-    @When("I receive an OTP")
-    public void i_receive_an_otp() {
-        // Here you'd ideally have a way to programmatically check for the OTP
-        // For simplicity, we'll simulate it
-        // In an actual setup, you might want to use a mock service or API call to get this OTP
 
-        // Simulating the OTP received
-        driver.findElement(By.id("otp-input")).sendKeys("123456"); // Replace with actual selector
-        driver.findElement(By.id("submit-otp-button")).click(); // Replace with actual selector
+    public void getOtpFromTheAPI(String userId) {
+        RestAssured.baseURI = "https://dev-v3.aqar.fm/dev";
+        Response response = RestAssured.given().when().get("/user/" + userId);
+        otp = response.jsonPath().getString("find {it.id == " + userId + "}.vcode");
     }
 
-    @When("I enter the OTP {string}")
-    public void i_enter_the_otp(String otp) {
-        driver.findElement(By.id("otp-input")).sendKeys(otp); // Replace with actual selector
-        driver.findElement(By.id("submit-otp-button")).click(); // Replace with actual selector
+    @When("User enters wrong OTP {string} and a short password")
+    public void userEntersWrongOtpAndShortPassword(String wrongOtp) {
+        otpField = driver.findElement(By.xpath("//*[@id=\"__next\"]/main/div/div[2]/div/div/div/div/div[3]/div[2]/div[1]/input"));
+        otpField.sendKeys(wrongOtp);
+        newPasswordField = driver.findElement(By.xpath("//*[@id=\"__next\"]/main/div/div[2]/div/div/div/div/div[3]/div[4]/div/input"));
+        newPasswordField.sendKeys("9876");
+        repeatPasswordField = driver.findElement(By.xpath("//*[@id=\"__next\"]/main/div/div[2]/div/div/div/div/div[3]/div[6]/div/input"));
+        repeatPasswordField.sendKeys("9876");
+        resetPasswordButton = driver.findElement(By.xpath("//*[@id=\"__next\"]/main/div/div[2]/div/div/div/div/button"));
+        resetPasswordButton.click();
+
+        // Verify error messages
+        passwordErrorMessage = driver.findElement(By.xpath("//*[@id=\"__next\"]/main/div/div[2]/div/div/div/div/div[3]/div[6]/ul/li/div/div"));
+        otpErrorMessage = driver.findElement(By.xpath("//*[@id=\"__next\"]/main/div/div[2]/div/div/div/div/div[3]/div[2]/div[2]/div"));
+        Assert.assertTrue(passwordErrorMessage.isDisplayed(), "Expected password error message not displayed.");
+        Assert.assertTrue(otpErrorMessage.isDisplayed(), "Expected OTP error message not displayed.");
     }
 
-    @When("I enter a valid new password {string}")
-    public void i_enter_a_valid_new_password(String newPassword) {
-        driver.findElement(By.id("new-password-input")).sendKeys(newPassword); // Replace with actual selector
-        driver.findElement(By.id("submit-password-button")).click(); // Replace with actual selector
+    @When("User enters an invalid password {string}")
+    public void userEntersInvalidPassword(String password) {
+        newPasswordField = driver.findElement(By.xpath("//*[@id=\"__next\"]/main/div/div[2]/div/div/div/div/div[3]/div[4]/div/input"));
+        newPasswordField.sendKeys(password);
+        repeatPasswordField = driver.findElement(By.xpath("//*[@id=\"__next\"]/main/div/div[2]/div/div/div/div/div[3]/div[6]/div/input"));
+        repeatPasswordField.sendKeys(password);
+        resetPasswordButton.click();
+        Assert.assertTrue(passwordErrorMessage.isDisplayed(), "Expected password error message not displayed.");
     }
 
-    @When("I enter a new password {string}")
-    public void i_enter_a_new_password(String newPassword) {
-        driver.findElement(By.id("new-password-input")).sendKeys(newPassword); // Replace with actual selector
-        driver.findElement(By.id("submit-password-button")).click(); // Replace with actual selector
+    @When("User enters a valid OTP")
+    public void userEntersValidOtp() {
+        otpField = driver.findElement(By.xpath("//*[@id=\"__next\"]/main/div/div[2]/div/div/div/div/div[3]/div[2]/div[1]/input"));
+        otpField.sendKeys(otp);
     }
 
-    @Then("I should receive an OTP for password reset")
-    public void i_should_receive_an_otp_for_password_reset() {
-        // Verify OTP messaging logic depending on how the application handles it
-        // Could add a check for a successful OTP sent message or update logic as needed
+    @When("User enters a valid password {string}")
+    public void userEntersValidPassword(String password) {
+        newPasswordField = driver.findElement(By.xpath("//*[@id=\"__next\"]/main/div/div[2]/div/div/div/div/div[3]/div[4]/div/input"));
+        newPasswordField.sendKeys(password);
+        repeatPasswordField = driver.findElement(By.xpath("//*[@id=\"__next\"]/main/div/div[2]/div/div/div/div/div[3]/div[6]/div/input"));
+        repeatPasswordField.sendKeys(password);
+        resetPasswordButton = driver.findElement(By.xpath("//*[@id=\"__next\"]/main/div/div[2]/div/div/div/div/button"));
+        resetPasswordButton.click();
     }
 
-    @Then("I should see an error message {string}")
-    public void i_should_see_an_error_message(String expectedErrorMessage) {
-        String actualErrorMessage = driver.findElement(By.id("error-message")).getText(); // Use actual selector for error messages
-        assertEquals(actualErrorMessage, expectedErrorMessage);
-        driver.quit();
+    @Then("User should be able to reset the password successfully")
+    public void userShouldBeAbleToResetPasswordSuccessfully() {
+        Assert.assertFalse(otpErrorMessage.isDisplayed(), "OTP error message should not be displayed.");
+        Assert.assertFalse(passwordErrorMessage.isDisplayed(), "Password error message should not be displayed.");
     }
 
-    @Then("I should see a success message {string}")
-    public void i_should_see_a_success_message(String expectedSuccessMessage) {
-        String actualSuccessMessage = driver.findElement(By.id("success-message")).getText(); // Use actual selector for success messages
-        assertEquals(actualSuccessMessage, expectedSuccessMessage);
-        driver.quit();
+    // Cleanup method to close the driver
+    public void tearDown() {
+        if (driver != null) {
+            driver.quit();
+        }
     }
 }
