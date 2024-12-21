@@ -1,12 +1,6 @@
 package steps;
 
-import io.cucumber.java.After;
-import io.cucumber.java.Before;
-import io.cucumber.java.BeforeAll;
-import io.cucumber.java.en.And;
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
-import io.cucumber.java.en.When;
+import io.cucumber.java.en.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -23,209 +17,183 @@ public class LoginUiExecution {
     private WebDriver driver;
     private static final String LOGIN_URL = "https://next.aqar.fm/login"; // Test page URL
 
-    // Page elements
-    private WebElement title;
-    private WebElement passwordField;
-    private WebElement phoneField;
-    private WebElement loginButton;
+    // Page element locators
+    private static final By PASSWORD_FIELD_LOCATOR = By.xpath("//*[@id='__next']/main/div/div[2]/div/div/div/div/div[5]/div[1]/input");
+    private static final By PHONE_FIELD_LOCATOR = By.xpath("//*[@id='__next']/main/div/div[2]/div/div/div/div/div[3]/div[1]/input");
+    private static final By LOGIN_BUTTON_LOCATOR = By.xpath("//*[@id='__next']/main/div/div[2]/div/div/div/div/button");
+    private static final By ERROR_MESSAGE_PASSWORD_LOCATOR = By.xpath("//*[contains(text(),'كلمة المرور غير صحيحة')]");
+    private static final By ERROR_MESSAGE_PHONE_LOCATOR = By.xpath("//*[contains(text(),'مطلوب رقم جوال سعودي')]");
+    private static final By ERROR_MESSAGE_EMPTY_PASSWORD_LOCATOR = By.xpath("//*[contains(text(),'مطلوب كلمة المرور')]");
+    private static final By PASSWORD_HIDE_ICON_LOCATOR = By.xpath("//*[@id='__next']/main/div/div[2]/div/div/div/div/div[5]/div[1]/button");
+    private static final By PROFILE_ICON_LOCATOR = By.xpath("//*[@id='__next']/main/div/div[1]/div[2]/button/span/img");
 
-
-
-public void set() {
-    //relpace the path with your Chrome Driver path
-    System.setProperty("webdriver.chrome.driver", "C:/Users/PC/Downloads/chromedriver-win32/chromedriver.exe");
-}
-    private void initializeElements() {
-        title = driver.findElement(By.xpath("//*[@id='__next']/main/div/div[2]/div/div/h1"));
-        passwordField = driver.findElement(By.xpath("//*[@id='__next']/main/div/div[2]/div/div/div/div/div[5]/div[1]/input"));
-        phoneField = driver.findElement(By.xpath("//*[@id='__next']/main/div/div[2]/div/div/div/div/div[3]/div[1]/input"));
-        loginButton = driver.findElement(By.xpath("//*[@id='__next']/main/div/div[2]/div/div/div/div/button"));
+    public void setUp() {
+        System.setProperty("webdriver.chrome.driver", "C:/Users/PC/Downloads/chromedriver-win32/chromedriver.exe");
+        driver = new ChromeDriver();
+        driver.manage().window().maximize(); // Maximize the browser window
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10)); // Implicit wait
     }
-
 
     public void tearDown() {
         if (driver != null) {
             driver.quit(); // Close the browser after tests
         }
     }
-    @When("User enters correct Phone and correct password")
-    @Given("User is on the login page")
-    public void user_on_the_login_page() {
 
+    private void openLoginPage() {
+        driver.get(LOGIN_URL);
+    }
+
+    @Given("User is on the login page")
+    public void userOnTheLoginPage() {
+        setUp();
+        openLoginPage();
     }
 
     @Then("The login form with all its fields and button should appear")
-    public void login_form_appearance() {
-        Assert.assertTrue(passwordField.isDisplayed(), "Password field is not displayed");
-        Assert.assertTrue(phoneField.isDisplayed(), "Phone field is not displayed");
-        Assert.assertTrue(loginButton.isDisplayed(), "Login button is not displayed");
+    public void loginFormAppearance() {
+        Assert.assertTrue(driver.findElement(PASSWORD_FIELD_LOCATOR).isDisplayed(), "Password field is not displayed");
+        Assert.assertTrue(driver.findElement(PHONE_FIELD_LOCATOR).isDisplayed(), "Phone field is not displayed");
+        Assert.assertTrue(driver.findElement(LOGIN_BUTTON_LOCATOR).isDisplayed(), "Login button is not displayed");
         tearDown();
     }
 
     @When("User enters valid Phone and incorrect password")
-    public void user_enters_valid_phone_and_incorrect_password() {
-
+    public void userEntersValidPhoneAndIncorrectPassword() {
+        driver.findElement(PHONE_FIELD_LOCATOR).sendKeys("521000400");
+        driver.findElement(PASSWORD_FIELD_LOCATOR).sendKeys("incorrectPassword");
+        driver.findElement(LOGIN_BUTTON_LOCATOR).click();
     }
 
     @Then("An error message should appear on the screen")
-    public void an_error_message_should_appear_on_the_screen() {
-        set();
-        driver = new ChromeDriver();
-        driver.manage().window().maximize(); // Maximize the browser window
-        driver.get(LOGIN_URL);
-        initializeElements();
-        phoneField.sendKeys("521000400");
-        passwordField.sendKeys("incorrectPassword");
-        loginButton.click();
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        WebElement errorMessage = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[contains(text(),'كلمة المرور غير صحيحة')]")));
+    public void anErrorMessageShouldAppearOnTheScreen() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(40));
+        WebElement errorMessage = wait.until(ExpectedConditions.visibilityOfElementLocated(ERROR_MESSAGE_PASSWORD_LOCATOR));
         Assert.assertTrue(errorMessage.isDisplayed(), "Error message for incorrect password is not displayed");
         tearDown();
     }
 
     @When("User enters valid password and incorrect phone number")
-    public void valid_password_incorrect_phone() {
-
+    public void userEntersValidPasswordAndIncorrectPhoneNumber() {
+        driver.findElement(PHONE_FIELD_LOCATOR).sendKeys("123456789");
+        driver.findElement(PASSWORD_FIELD_LOCATOR).sendKeys("Pass@test123");
+        driver.findElement(LOGIN_BUTTON_LOCATOR).click();
     }
 
     @Then("Invalid phone number error message should appear")
-    public void invalid_phone_number_error_message() {
-        set();
-        driver = new ChromeDriver();
-        driver.manage().window().maximize(); // Maximize the browser window
-        driver.get(LOGIN_URL);
-        initializeElements();
-        phoneField.sendKeys("123456789");
-        passwordField.sendKeys("Pass@test123");
-        loginButton.click();
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        WebElement phoneErrorMessage = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[contains(text(),'مطلوب رقم جوال سعودي')]")));
+    public void invalidPhoneNumberErrorMessage() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(40));
+        WebElement phoneErrorMessage = wait.until(ExpectedConditions.visibilityOfElementLocated(ERROR_MESSAGE_PHONE_LOCATOR));
         Assert.assertTrue(phoneErrorMessage.isDisplayed(), "Error message for invalid phone number is not displayed");
         tearDown();
     }
-
     @When("User clicks login button with empty fields")
-    public void blank_fields() {
-
+    public void blankFields() {
+        driver.findElement(PHONE_FIELD_LOCATOR).clear();
+        driver.findElement(PASSWORD_FIELD_LOCATOR).clear();
+        driver.findElement(LOGIN_BUTTON_LOCATOR).click();
     }
 
     @Then("Two error messages should appear on the screen")
-    public void two_error_messages_should_appear() {
-        set();
-        driver = new ChromeDriver();
-        driver.manage().window().maximize(); // Maximize the browser window
-        driver.get(LOGIN_URL);
-        initializeElements();
-        phoneField.clear();
-        passwordField.clear();
-        loginButton.click();
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        WebElement phoneErrorMessage = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[contains(text(),'مطلوب رقم جوال سعودي')]")));
-        WebElement pwErrorMessage = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[contains(text(),'مطلوب كلمة المرور')]")));
+    public void twoErrorMessagesShouldAppear() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(40));
+        WebElement phoneErrorMessage = wait.until(ExpectedConditions.visibilityOfElementLocated(ERROR_MESSAGE_PHONE_LOCATOR));
+        WebElement pwErrorMessage = wait.until(ExpectedConditions.visibilityOfElementLocated(ERROR_MESSAGE_EMPTY_PASSWORD_LOCATOR));
         Assert.assertTrue(phoneErrorMessage.isDisplayed(), "Phone error message is not displayed");
         Assert.assertTrue(pwErrorMessage.isDisplayed(), "Password error message is not displayed");
         tearDown();
     }
 
     @When("User enters valid phone and leaves password field empty")
-    @Then("An error message for empty password should appear on the screen")
-    public void valid_phone_blank_password() {
-        set();
-        driver = new ChromeDriver();
-        driver.manage().window().maximize(); // Maximize the browser window
-        driver.get(LOGIN_URL);
-        initializeElements();
-        phoneField.clear();
-        phoneField.sendKeys("521000400");
-        passwordField.clear();
-        loginButton.click();
+    public void userEntersValidPhoneAndLeavesPasswordFieldEmpty() {
+        driver.findElement(PHONE_FIELD_LOCATOR).sendKeys("521000400");
+        driver.findElement(PASSWORD_FIELD_LOCATOR).clear();
+        driver.findElement(LOGIN_BUTTON_LOCATOR).click();
+    }
 
-        WebElement pwErrorMessage = driver.findElement(By.xpath("//*[contains(text(),'مطلوب كلمة المرور')]"));
+    @Then("An error message for empty password should appear on the screen")
+    public void emptyPasswordErrorMessage() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(40));
+        WebElement pwErrorMessage = wait.until(ExpectedConditions.visibilityOfElementLocated(ERROR_MESSAGE_EMPTY_PASSWORD_LOCATOR));
         Assert.assertTrue(pwErrorMessage.isDisplayed(), "Error message for empty password is not displayed");
         tearDown();
     }
 
     @When("User enters valid password and leaves phone field empty")
-    @Then("An error message for empty phone should appear on the screen")
-    public void valid_password_blank_phone() {
-        set();
-        driver = new ChromeDriver();
-        driver.manage().window().maximize(); // Maximize the browser window
-        driver.get(LOGIN_URL);
-        initializeElements();
-        passwordField.clear();
-        passwordField.sendKeys("Pass@test123");
-        phoneField.clear();
-        loginButton.click();
+    public void userEntersValidPasswordAndLeavesPhoneFieldEmpty() {
+        driver.findElement(PASSWORD_FIELD_LOCATOR).sendKeys("Pass@test123");
+        driver.findElement(PHONE_FIELD_LOCATOR).clear();
+        driver.findElement(LOGIN_BUTTON_LOCATOR).click();
+    }
 
-        WebElement phoneErrorMessage = driver.findElement(By.xpath("//*[contains(text(),'مطلوب رقم جوال سعودي')]"));
+    @Then("An error message for empty phone should appear on the screen")
+    public void emptyPhoneErrorMessage() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(40));
+        WebElement phoneErrorMessage = wait.until(ExpectedConditions.visibilityOfElementLocated(ERROR_MESSAGE_PHONE_LOCATOR));
         Assert.assertTrue(phoneErrorMessage.isDisplayed(), "Error message for empty phone is not displayed");
         tearDown();
     }
 
     @When("User enters characters in phone field")
+    public void enterCharactersInsteadOfNumberInPhoneField() {
+        driver.findElement(PHONE_FIELD_LOCATOR).sendKeys("fghjks1234");
+    }
+
     @Then("Any type of characters should be blocked")
-    public void enter_char_instead_of_number_on_phoneField() {
-        set();
-        driver = new ChromeDriver();
-        driver.manage().window().maximize(); // Maximize the browser window
-        driver.get(LOGIN_URL);
-        initializeElements();
-        phoneField.sendKeys("fghjks1234");
-        String enteredText = phoneField.getAttribute("value");
+    public void validatePhoneFieldAcceptance() {
+        String enteredText = driver.findElement(PHONE_FIELD_LOCATOR).getAttribute("value");
         Assert.assertFalse(enteredText.matches("^[0-9]*$"), "Phone field should not accept non-numeric characters");
-   tearDown();
+        tearDown();
     }
 
     @When("User enters characters in password field and the content is hidden")
-    @And("click on unhide password icon")
-    public void hide(){}
-    @Then("The text in the password field is unhidden")
-    public void hide_and_unhide_password() {
-       set();
-        driver = new ChromeDriver();
-        driver.manage().window().maximize(); // Maximize the browser window
-        driver.get(LOGIN_URL);
-        initializeElements();
-        String passwordType = passwordField.getAttribute("type");
-        Assert.assertEquals(passwordType, "password", "Password field is not hidden");
+    public void inputHiddenPasswordCharacters() {
+        driver.findElement(PASSWORD_FIELD_LOCATOR).sendKeys("hiddenPassword");
+    }
 
-        WebElement passwordHideIcon = driver.findElement(By.xpath("//*[@id='__next']/main/div/div[2]/div/div/div/div/div[5]/div[1]/button"));
+    @And("click on unhide password icon")
+    public void clickUnhidePasswordIcon() {
+        WebElement passwordHideIcon = driver.findElement(PASSWORD_HIDE_ICON_LOCATOR);
         Actions actions = new Actions(driver);
         actions.moveToElement(passwordHideIcon).click().perform();
+    }
 
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
-        wait.until(ExpectedConditions.attributeToBe(passwordField, "type", "text"));
+    @Then("The text in the password field is unhidden")
+    public void hideAndUnhidePassword() {
+        String initialPasswordType = driver.findElement(PASSWORD_FIELD_LOCATOR).getAttribute("type");
+        Assert.assertEquals(initialPasswordType, "password", "Password field is not hidden initially");
 
-        passwordType = passwordField.getAttribute("type");
+        clickUnhidePasswordIcon();
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(40));
+        wait.until(ExpectedConditions.attributeToBe(driver.findElement(PASSWORD_FIELD_LOCATOR), "type", "text"));
+
+        String passwordType = driver.findElement(PASSWORD_FIELD_LOCATOR).getAttribute("type");
         Assert.assertEquals(passwordType, "text", "Password field is not visible after clicking unhide");
 
-        // Hide again
+        // Hide the password again
+        WebElement passwordHideIcon = driver.findElement(PASSWORD_HIDE_ICON_LOCATOR);
         passwordHideIcon.click();
-        wait.until(ExpectedConditions.attributeToBe(passwordField, "type", "password"));
-        passwordType = passwordField.getAttribute("type");
+        wait.until(ExpectedConditions.attributeToBe(driver.findElement(PASSWORD_FIELD_LOCATOR), "type", "password"));
+
+        passwordType = driver.findElement(PASSWORD_FIELD_LOCATOR).getAttribute("type");
         Assert.assertEquals(passwordType, "password", "Password field is not hidden again");
+
         tearDown();
     }
 
-
+    @When("User enters correct Phone and correct password")
+    public void correctPhoneCorrectPassword() {
+        driver.findElement(PHONE_FIELD_LOCATOR).sendKeys("521000400");
+        driver.findElement(PASSWORD_FIELD_LOCATOR).sendKeys("Pass@test123");
+        driver.findElement(LOGIN_BUTTON_LOCATOR).click();
+    }
 
     @Then("User should be redirected to the dashboard")
-    public void correct_phone_correct_password() {
-        set();
-        driver = new ChromeDriver();
-        driver.manage().window().maximize(); // Maximize the browser window
-        driver.get(LOGIN_URL);
-        initializeElements();
-        phoneField.sendKeys("521000400");
-        passwordField.sendKeys("Pass@test123");
-        loginButton.click();
-
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
-        WebElement profileIcon = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id='__next']/main/div/div[1]/div[2]/button/span/img")));
+    public void userRedirectedToDashboard() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(40));
+        WebElement profileIcon = wait.until(ExpectedConditions.visibilityOfElementLocated(PROFILE_ICON_LOCATOR));
         Assert.assertNotNull(profileIcon, "User was not redirected to the dashboard");
         tearDown();
     }
-
-
 }

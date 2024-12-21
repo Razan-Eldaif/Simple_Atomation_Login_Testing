@@ -29,7 +29,7 @@ Feature: Login Functionality
     When User enters valid password and leaves phone field empty
     Then An error message for empty phone should appear on the screen
 
-  Scenario: Verify phone number feild validation
+  Scenario: Verify phone number field validation
     Given User is on the login page
     When User enters characters in phone field
     Then Any type of characters should be blocked
@@ -37,7 +37,7 @@ Feature: Login Functionality
   Scenario: Verify password hidden
     Given User is on the login page
     When User enters characters in password field and the content is hidden
-    And click on unhide password icon
+    And click on unhidden password icon
     Then The text in the password field is unhidden
 
   Scenario: Verify Login with valid Phone number and Password
