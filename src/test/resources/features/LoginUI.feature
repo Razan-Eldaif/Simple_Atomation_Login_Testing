@@ -33,3 +33,14 @@ Feature: Login Functionality
     Given User is on the login page
     When User enters characters in phone field
     Then Any type of characters should be blocked
+
+  Scenario: Verify password hidden
+    Given User is on the login page
+    When User enters characters in password field and the content is hidden
+    And click on unhidden password icon
+    Then The text in the password field is unhidden
+
+  Scenario: Verify Login with valid Phone number and Password
+    Given User is on the login page
+    When User enters correct Phone and correct password
+    Then User should be redirected to the dashboard

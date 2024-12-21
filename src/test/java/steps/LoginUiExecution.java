@@ -16,6 +16,7 @@ public class LoginUiExecution {
 
     private WebDriver driver;
     private static final String LOGIN_URL = "https://next.aqar.fm/login"; // Test page URL
+    private static boolean isPageOpened = false;
 
     // Page element locators
     private static final By PASSWORD_FIELD_LOCATOR = By.xpath("//*[@id='__next']/main/div/div[2]/div/div/div/div/div[5]/div[1]/input");
@@ -33,6 +34,15 @@ public class LoginUiExecution {
         driver.manage().window().maximize(); // Maximize the browser window
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10)); // Implicit wait
     }
+    private void tearDownDelayed() {
+        try {
+            Thread.sleep(30000); // Wait for 30 seconds before tearing down
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        tearDown();
+
+    }
 
     public void tearDown() {
         if (driver != null) {
@@ -41,7 +51,12 @@ public class LoginUiExecution {
     }
 
     private void openLoginPage() {
-        driver.get(LOGIN_URL);
+        if (!isPageOpened) {
+            driver.get(LOGIN_URL);
+            isPageOpened = true;
+        } else {
+            driver.navigate().refresh();
+        }
     }
 
     @Given("User is on the login page")
@@ -70,7 +85,7 @@ public class LoginUiExecution {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(40));
         WebElement errorMessage = wait.until(ExpectedConditions.visibilityOfElementLocated(ERROR_MESSAGE_PASSWORD_LOCATOR));
         Assert.assertTrue(errorMessage.isDisplayed(), "Error message for incorrect password is not displayed");
-        tearDown();
+        tearDownDelayed();
     }
 
     @When("User enters valid password and incorrect phone number")
@@ -85,7 +100,7 @@ public class LoginUiExecution {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(40));
         WebElement phoneErrorMessage = wait.until(ExpectedConditions.visibilityOfElementLocated(ERROR_MESSAGE_PHONE_LOCATOR));
         Assert.assertTrue(phoneErrorMessage.isDisplayed(), "Error message for invalid phone number is not displayed");
-        tearDown();
+        tearDownDelayed();
     }
     @When("User clicks login button with empty fields")
     public void blankFields() {
@@ -101,7 +116,7 @@ public class LoginUiExecution {
         WebElement pwErrorMessage = wait.until(ExpectedConditions.visibilityOfElementLocated(ERROR_MESSAGE_EMPTY_PASSWORD_LOCATOR));
         Assert.assertTrue(phoneErrorMessage.isDisplayed(), "Phone error message is not displayed");
         Assert.assertTrue(pwErrorMessage.isDisplayed(), "Password error message is not displayed");
-        tearDown();
+        tearDownDelayed();
     }
 
     @When("User enters valid phone and leaves password field empty")
@@ -116,7 +131,7 @@ public class LoginUiExecution {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(40));
         WebElement pwErrorMessage = wait.until(ExpectedConditions.visibilityOfElementLocated(ERROR_MESSAGE_EMPTY_PASSWORD_LOCATOR));
         Assert.assertTrue(pwErrorMessage.isDisplayed(), "Error message for empty password is not displayed");
-        tearDown();
+        tearDownDelayed();
     }
 
     @When("User enters valid password and leaves phone field empty")
@@ -131,7 +146,7 @@ public class LoginUiExecution {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(40));
         WebElement phoneErrorMessage = wait.until(ExpectedConditions.visibilityOfElementLocated(ERROR_MESSAGE_PHONE_LOCATOR));
         Assert.assertTrue(phoneErrorMessage.isDisplayed(), "Error message for empty phone is not displayed");
-        tearDown();
+        tearDownDelayed();
     }
 
     @When("User enters characters in phone field")
@@ -143,7 +158,7 @@ public class LoginUiExecution {
     public void validatePhoneFieldAcceptance() {
         String enteredText = driver.findElement(PHONE_FIELD_LOCATOR).getAttribute("value");
         Assert.assertTrue(enteredText.matches("^[0-9]*$"), "Phone field should not accept non-numeric characters");
-        tearDown();
+        tearDownDelayed();
     }
 
     @When("User enters characters in password field and the content is hidden")
@@ -157,17 +172,13 @@ public class LoginUiExecution {
     @Then("The text in the password field is unhidden")
     public void hideAndUnhidePassword() {
         WebElement passwordHideIcon = driver.findElement(PASSWORD_HIDE_ICON_LOCATOR);
-        Actions actions = new Actions(driver);
-        actions.moveToElement(passwordHideIcon).click().perform();
-        String initialPasswordType = driver.findElement(PASSWORD_FIELD_LOCATOR).getAttribute("type");
-        Assert.assertEquals(initialPasswordType, "password", "Password field is not hidden initially");
+        passwordHideIcon.click();
 
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(40));
-        wait.until(ExpectedConditions.attributeToBe(driver.findElement(PASSWORD_FIELD_LOCATOR), "type", "text"));
-
+        // Check the type of the password field
         String passwordType = driver.findElement(PASSWORD_FIELD_LOCATOR).getAttribute("type");
         Assert.assertEquals(passwordType, "text", "Password field is not visible after clicking unhide");
-        tearDown();
+        tearDownDelayed();
+
     }
 
     @When("User enters correct Phone and correct password")
@@ -182,6 +193,6 @@ public class LoginUiExecution {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(40));
         WebElement profileIcon = wait.until(ExpectedConditions.visibilityOfElementLocated(PROFILE_ICON_LOCATOR));
         Assert.assertNotNull(profileIcon, "User was not redirected to the dashboard");
-
+        tearDownDelayed();
     }
 }
