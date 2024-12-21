@@ -142,7 +142,7 @@ public class LoginUiExecution {
     @Then("Any type of characters should be blocked")
     public void validatePhoneFieldAcceptance() {
         String enteredText = driver.findElement(PHONE_FIELD_LOCATOR).getAttribute("value");
-        Assert.assertFalse(enteredText.matches("^[0-9]*$"), "Phone field should not accept non-numeric characters");
+        Assert.assertTrue(enteredText.matches("^[0-9]*$"), "Phone field should not accept non-numeric characters");
         tearDown();
     }
 
@@ -151,7 +151,7 @@ public class LoginUiExecution {
         driver.findElement(PASSWORD_FIELD_LOCATOR).sendKeys("hiddenPassword");
     }
 
-    @And("click on unhide password icon")
+    @And("click on unhidden password icon")
     public void clickUnhidePasswordIcon() {
         WebElement passwordHideIcon = driver.findElement(PASSWORD_HIDE_ICON_LOCATOR);
         Actions actions = new Actions(driver);
