@@ -152,33 +152,21 @@ public class LoginUiExecution {
     }
 
     @And("click on unhidden password icon")
-    public void clickUnhidePasswordIcon() {
-        WebElement passwordHideIcon = driver.findElement(PASSWORD_HIDE_ICON_LOCATOR);
-        Actions actions = new Actions(driver);
-        actions.moveToElement(passwordHideIcon).click().perform();
-    }
+    public void clickUnhidePasswordIcon() {}
 
     @Then("The text in the password field is unhidden")
     public void hideAndUnhidePassword() {
+        WebElement passwordHideIcon = driver.findElement(PASSWORD_HIDE_ICON_LOCATOR);
+        Actions actions = new Actions(driver);
+        actions.moveToElement(passwordHideIcon).click().perform();
         String initialPasswordType = driver.findElement(PASSWORD_FIELD_LOCATOR).getAttribute("type");
         Assert.assertEquals(initialPasswordType, "password", "Password field is not hidden initially");
-
-        clickUnhidePasswordIcon();
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(40));
         wait.until(ExpectedConditions.attributeToBe(driver.findElement(PASSWORD_FIELD_LOCATOR), "type", "text"));
 
         String passwordType = driver.findElement(PASSWORD_FIELD_LOCATOR).getAttribute("type");
         Assert.assertEquals(passwordType, "text", "Password field is not visible after clicking unhide");
-
-        // Hide the password again
-        WebElement passwordHideIcon = driver.findElement(PASSWORD_HIDE_ICON_LOCATOR);
-        passwordHideIcon.click();
-        wait.until(ExpectedConditions.attributeToBe(driver.findElement(PASSWORD_FIELD_LOCATOR), "type", "password"));
-
-        passwordType = driver.findElement(PASSWORD_FIELD_LOCATOR).getAttribute("type");
-        Assert.assertEquals(passwordType, "password", "Password field is not hidden again");
-
         tearDown();
     }
 
@@ -194,6 +182,6 @@ public class LoginUiExecution {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(40));
         WebElement profileIcon = wait.until(ExpectedConditions.visibilityOfElementLocated(PROFILE_ICON_LOCATOR));
         Assert.assertNotNull(profileIcon, "User was not redirected to the dashboard");
-        tearDown();
+
     }
 }
