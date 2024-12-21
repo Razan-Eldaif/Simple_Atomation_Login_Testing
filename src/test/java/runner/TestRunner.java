@@ -4,7 +4,7 @@ import io.cucumber.testng.AbstractTestNGCucumberTests;
 import io.cucumber.testng.CucumberOptions;
 
 @CucumberOptions(
-        features = "src/test/resources/features/LoginUI.feature", // Path to the folder containing feature files
+        features = "src/test/resources/features/LoginUI.feature", // This run Login, if you want to run Reset Password, replace it
         glue = "steps", // Package name where step definitions are located for binding step definitions with steps
         plugin = { "pretty", "html:target/cucumber-reports.html" } // Specifies output formats for test results
 )

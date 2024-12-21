@@ -33,13 +33,13 @@ public class PasswordResetExecution {
     private WebElement passwordErrorMessage;
     private WebElement otpErrorMessage;
 
-    @Before
-    public void setUp() {
-        System.setProperty("webdriver.chrome.driver", "C:/Users/PC/Downloads/chromedriver-win32/chromedriver.exe");
-        driver = new ChromeDriver();
-        driver.get("https://next.aqar.fm/login");
+   // @Before
+   // public void setUp() {
+    //    System.setProperty("webdriver.chrome.driver", "C:/Users/PC/Downloads/chromedriver-win32/chromedriver.exe");
+      //  driver = new ChromeDriver();
+      //  driver.get("https://next.aqar.fm/login");
 
-    }
+  //  }
 
     @After
     public void tearDown() {
