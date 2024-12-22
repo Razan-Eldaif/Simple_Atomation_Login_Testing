@@ -1,7 +1,7 @@
 Feature: Password Reset Functionality
 
   @ResetPassword
-  Scenario: User enters an unrigesterd Phone number
+  Scenario: User enters an unregistered Phone number
     Given User on Password Reset page
     When User enters an unregistered phone number "123456789"
     Then An error message for wrong phone appears
