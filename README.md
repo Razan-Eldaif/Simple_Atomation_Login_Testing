@@ -20,35 +20,42 @@ This project automates the testing of Login and Reset password functionalities. 
 
 ## Installation
 1. Clone the repository:
+   
    ```bash
    git clone https://github.com/Razan-Eldaif/Simple_Automation_Login_Testing.git
    ```
-2. Navigate into the project directory:
+3. Navigate into the project directory:
+   
    ```bash
    cd Simple_Automation_Login_Testing
    ```
-3. Build the project using Maven:
+5. Build the project using Maven:
+   
    ```bash
    mvn clean install
    ```
 
 ## Usage
-1. Open the terminal and navigate to the project root directory.
+1. Open the project on your IDE.
 2. Open The "TestRunner" Class to identify the feature file you want to run. (By default it's LoginUI.feature)
+   
     ```bash
            features = "src/test/resources/features/LoginUI.feature", // Path to the file you want to run
 
    ```
 4. Run the tests using Maven:
+   
    ```bash
    mvn test
    ```
-5. To run the API test, just run the class "APITest".
+
+6. To run the API test, just run the class "APITest".
 ## Test Results
 After running your test, open the "target" file, you will find an html file called "Cucumber-report", Open it in your browser to see the test result.
 
 
 ## Project Structure
+
  ```bash
 Simple_Automation_Login_Testing/ 
 ├── src/
