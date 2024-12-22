@@ -127,14 +127,13 @@ public class PasswordResetExecution {
     public void errorMessage() {
         WebElement passwordErrorMessage = wait.until(ExpectedConditions.visibilityOfElementLocated(ResetPasswordLocators.PASSWORD_ERROR_MESSAGE_LOCATOR));
         Assert.assertTrue(passwordErrorMessage.isDisplayed(), "Expected password error message is not displayed.");
+        newPasswordField.clear();
+        repeatPasswordField.clear();
     }
 
     @When("User enters valid password {string}")
     public void userEntersValidPasswordAndCorrectOtp(String password) {
         getOtpFromTheApi("163165");
-
-        otpField = driver.findElement(ResetPasswordLocators.OTP_FIELD_LOCATOR);
-        otpField.sendKeys(otp);
 
         newPasswordField = driver.findElement(ResetPasswordLocators.NEW_PASSWORD_FIELD_LOCATOR);
         newPasswordField.sendKeys(password);
@@ -149,6 +148,7 @@ public class PasswordResetExecution {
     @Then("User should be able to reset the password successfully")
     public void userShouldBeAbleToResetPasswordSuccessfully() {
         // Wait for profile icon to be visible
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(40));
         WebElement profileIcon = wait.until(ExpectedConditions.visibilityOfElementLocated(ResetPasswordLocators.PROFILE_ICON_LOCATOR));
         Assert.assertNotNull(profileIcon, "Profile icon should be visible after password reset.");
     }
