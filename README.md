@@ -99,7 +99,8 @@ Simple_Automation_Login_Testing/
 - User Enters Incorrect OTP and a SInvalid Password
 - User Successfully Resets the Password
   
-
+## Note
+If you reset the password during the Reset Password test and want to run the Login test afterward, you will need to modify the password in the LoginUiExecution class.
 
 ## Challenges
 During the testing of Reset Password page I have been blocked from the server several times. So it took time to automate it.
