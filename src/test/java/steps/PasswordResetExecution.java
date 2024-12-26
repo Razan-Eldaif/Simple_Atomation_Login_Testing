@@ -150,6 +150,6 @@ public class PasswordResetExecution {
         // Wait for profile icon to be visible
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(40));
         WebElement profileIcon = wait.until(ExpectedConditions.visibilityOfElementLocated(ResetPasswordLocators.PROFILE_ICON_LOCATOR));
-        Assert.assertNotNull(profileIcon, "Profile icon should be visible after password reset.");
+        Assert.assertNotNull(profileIcon, "Profile icon should be visible.");
     }
 }
